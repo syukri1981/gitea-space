@@ -91,6 +91,7 @@ import (
 	"code.gitea.io/gitea/routers/api/v1/org"
 	"code.gitea.io/gitea/routers/api/v1/packages"
 	"code.gitea.io/gitea/routers/api/v1/repo"
+	"code.gitea.io/gitea/routers/api/v1/geo"
 	"code.gitea.io/gitea/routers/api/v1/settings"
 	"code.gitea.io/gitea/routers/api/v1/user"
 	"code.gitea.io/gitea/routers/common"
@@ -1165,6 +1166,19 @@ func Routes() *web.Router {
 				}, context.UserAssignmentAPI(), checkTokenPublicOnly())
 			})
 		}, tokenRequiresScopes(auth_model.AccessTokenScopeCategoryUser), reqToken())
+
+		// Geo
+		m.Group("/geo", func() {
+			m.Group("/images", func() {
+				m.Get("", geo.ListImages)
+				m.Post("", bind(api.CreateGeoImageOption{}), geo.CreateImage)
+				m.Group("/{id}", func() {
+					m.Get("", geo.GetImage)
+					m.Patch("", bind(api.EditGeoImageOption{}), geo.EditImage)
+					m.Delete("", geo.DeleteImage)
+				})
+			})
+		}, reqToken())
 
 		// Repositories (requires repo scope, org scope)
 		m.Post("/org/{org}/repos",
